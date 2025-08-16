@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Plus, Edit, Trash2, Eye, EyeOff, Calendar, Globe } from 'lucide-react';
 import type { Blog } from '../types';
 import { adminBlogAPI } from '../utils/api';
-import { formatDateTime } from '../utils/helpers';
+import { formatDateTime, stripHtml, truncateText } from '../utils/helpers';
 import toast from 'react-hot-toast';
 
 const AdminDashboard: React.FC = () => {
@@ -170,7 +170,7 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-3">
                       <h3 className="text-lg font-medium text-gray-900 truncate">
-                        {blog.title}
+                        {stripHtml(blog.title)}
                       </h3>
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                         blog.is_published 
@@ -185,7 +185,7 @@ const AdminDashboard: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mt-1">
-                      {blog.preview}
+                      {truncateText(stripHtml(blog.preview), 160)}
                     </p>
                     <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                       <span className="flex items-center">

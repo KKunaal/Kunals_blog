@@ -5,7 +5,7 @@ import { CalendarIcon, HeartIcon, ChatBubbleLeftIcon, GlobeAltIcon } from '@hero
 import { useInView } from 'react-intersection-observer';
 import type { Blog } from '../types';
 import { publicBlogAPI } from '../utils/api';
-import { formatDate, timeAgo, truncateText } from '../utils/helpers';
+import { formatDate, timeAgo, truncateText, stripHtml } from '../utils/helpers';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -161,13 +161,13 @@ const Home: React.FC = () => {
                       {/* Title */}
                       <Link to={`/blog/${blog.id}`}>
                         <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-                          {blog.title}
+                          {stripHtml(blog.title)}
                         </h2>
                       </Link>
 
                       {/* Preview */}
                       <p className="text-gray-600 mb-6 leading-relaxed line-clamp-3">
-                        {truncateText(blog.preview, 120)}
+                        {truncateText(stripHtml(blog.preview), 120)}
                       </p>
 
                       {/* Meta Info */}

@@ -15,7 +15,7 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { publicBlogAPI } from '../utils/api';
 import type { Blog, Comment, CreateCommentRequest } from '../types';
-import { formatDate, timeAgo } from '../utils/helpers';
+import { formatDate, timeAgo, stripHtml } from '../utils/helpers';
 import { Loading } from '../components/ui/Loading';
 import Button from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -196,7 +196,7 @@ const BlogDetail: React.FC = () => {
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 leading-tight">
-            {blog.title}
+            {stripHtml(blog.title)}
           </h1>
 
           {/* Blog Image */}

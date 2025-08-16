@@ -53,6 +53,11 @@ export function truncateText(text: string, maxLength: number): string {
   return text.slice(0, maxLength) + '...';
 }
 
+export function stripHtml(input: string | undefined | null): string {
+  if (!input) return '';
+  return input.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+}
+
 export function extractImageUrls(imagesString: string): string[] {
   if (!imagesString) return [];
   return imagesString.split(',').filter(url => url.trim() !== '');
