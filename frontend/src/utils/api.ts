@@ -100,6 +100,8 @@ export const adminBlogAPI = {
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
     queryParams.append('published_only', 'false'); // Always get all blogs for admin
+    if (params.language) queryParams.append('language', params.language);
+    if ((params as any).sort_by) queryParams.append('sort_by', (params as any).sort_by as string);
 
     const response = await api.get(`/admin/blogs?${queryParams.toString()}`);
     return response.data;
@@ -112,6 +114,11 @@ export const adminBlogAPI = {
 
   updateBlog: async (id: string, blog: UpdateBlogRequest) => {
     const response = await api.put(`/admin/blogs/${id}`, blog);
+    return response.data;
+  },
+
+  applyVersion: async (id: string, versionId: string) => {
+    const response = await api.post(`/admin/blogs/${id}/versions/${versionId}/apply`);
     return response.data;
   },
 

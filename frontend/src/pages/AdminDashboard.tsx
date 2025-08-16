@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye, EyeOff, Calendar, Globe } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Calendar, Globe, BarChart3 } from 'lucide-react';
 import type { Blog } from '../types';
 import { adminBlogAPI } from '../utils/api';
 import { formatDateTime, stripHtml, truncateText } from '../utils/helpers';
@@ -11,25 +11,33 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [language, setLanguage] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'recent' | 'most_commented' | 'most_liked' | 'most_viewed'>('recent');
+  const [isRefetching, setIsRefetching] = useState(false);
 
   useEffect(() => {
     fetchBlogs();
-  }, [page]);
+  }, [page, language, sortBy]);
 
   const fetchBlogs = async () => {
     try {
-      setLoading(true);
+      if (loading) setLoading(true); else setIsRefetching(true);
       const response = await adminBlogAPI.getBlogs({
         page,
         limit: 10,
+        language: language || undefined,
+        sort_by: sortBy,
       });
       setBlogs(response.blogs);
       setTotalPages(response.pagination.total_pages);
+      setTotalCount(response.pagination.total || 0);
     } catch (error) {
       console.error('Failed to fetch blogs:', error);
       toast.error('Failed to fetch blogs');
     } finally {
       setLoading(false);
+      setIsRefetching(false);
     }
   };
 
@@ -98,16 +106,16 @@ const AdminDashboard: React.FC = () => {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="h-8 w-8 bg-blue-100 rounded-md flex items-center justify-center">
-                  <Eye className="h-5 w-5 text-blue-600" />
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">
-                    Published Blogs
+                    Lifetime Views
                   </dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {blogs.filter(blog => blog.is_published).length}
+                    {blogs.reduce((acc, b) => acc + (b.views_count || 0), 0)}
                   </dd>
                 </dl>
               </div>
@@ -160,14 +168,62 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+          <select value={language} onChange={(e) => { setLanguage(e.target.value); setPage(1); }} className="w-full rounded-md border border-gray-300 px-3 py-2">
+            <option value="">All</option>
+            <option value="english">English</option>
+            <option value="devanagari">देवनागरी</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+          <select value={sortBy} onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }} className="w-full rounded-md border border-gray-300 px-3 py-2">
+            <option value="recent">Most Recent</option>
+            <option value="most_liked">Most Liked</option>
+            <option value="most_commented">Most Commented</option>
+            <option value="most_viewed">Most Viewed</option>
+          </select>
+        </div>
+        <div className="hidden sm:block" />
+      </div>
+
+      {/* Top Pagination + Summary */}
+      <div className="flex items-center justify-between mb-3 text-sm text-gray-600">
+        <div>
+          {totalCount > 0 && (
+            <span>
+              Showing {Math.min((page - 1) * 10 + 1, totalCount)}–{Math.min(page * 10, totalCount)} of {totalCount}
+            </span>
+          )}
+        </div>
+        {totalPages > 1 && (
+          <nav className="flex space-x-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => setPage(pageNum)}
+                className={`px-3 py-1 rounded-md transition-colors ${
+                  page === pageNum ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                }`}
+              >
+                {pageNum}
+              </button>
+            ))}
+          </nav>
+        )}
+      </div>
+
       {/* Blog List */}
       {blogs.length > 0 ? (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <div className={`bg-white shadow overflow-hidden sm:rounded-md transition-opacity ${isRefetching ? 'opacity-60' : 'opacity-100'}`}>
           <ul className="divide-y divide-gray-200">
             {blogs.map((blog) => (
               <li key={blog.id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
+                  <Link to={`/admin/blog/edit/${blog.id}`} className="flex-1 min-w-0 block group">
                     <div className="flex items-center space-x-3">
                       <h3 className="text-lg font-medium text-gray-900 truncate">
                         {stripHtml(blog.title)}
@@ -198,8 +254,11 @@ const AdminDashboard: React.FC = () => {
                       <span>
                         {blog.comments_count} comments
                       </span>
+                      <span>
+                        {blog.views_count ?? 0} views
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                   
                   <div className="flex items-center space-x-2">
                     {blog.is_published && (

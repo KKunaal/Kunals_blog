@@ -48,6 +48,7 @@ func SetupRoutes(router *gin.Engine) {
 			// Blog management
 			admin.POST("/blogs", controllers.CreateBlog)
 			admin.PUT("/blogs/:id", controllers.UpdateBlog)
+			admin.POST("/blogs/:id/versions/:versionId/apply", controllers.ApplyVersion)
 			admin.DELETE("/blogs/:id", controllers.DeleteBlog)
 			admin.POST("/blogs/:id/publish", controllers.PublishBlog)
 			admin.POST("/blogs/:id/unpublish", controllers.UnpublishBlog)

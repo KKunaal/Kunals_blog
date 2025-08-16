@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CalendarIcon, HeartIcon, ChatBubbleLeftIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, HeartIcon, ChatBubbleLeftIcon, GlobeAltIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { useInView } from 'react-intersection-observer';
 import type { Blog } from '../types';
 import { publicBlogAPI } from '../utils/api';
@@ -18,7 +18,7 @@ const Home: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'recent' | 'most_commented' | 'most_liked'>('recent');
+  const [sortBy, setSortBy] = useState<'recent' | 'most_commented' | 'most_liked' | 'most_viewed'>('recent');
 
   useEffect(() => {
     fetchBlogs();
@@ -100,6 +100,7 @@ const Home: React.FC = () => {
               <option value="recent">Most Recent</option>
               <option value="most_liked">Most Liked</option>
               <option value="most_commented">Most Commented</option>
+              <option value="most_viewed">Most Viewed</option>
             </select>
           </div>
           <div className="hidden sm:block" />
@@ -168,6 +169,13 @@ const Home: React.FC = () => {
                             >
                               <HeartIcon className="h-4 w-4 mr-1" />
                               {blog.likes_count}
+                            </motion.span>
+                            <motion.span 
+                              whileHover={{ scale: 1.1 }}
+                              className="flex items-center hover:text-gray-700 transition-colors"
+                            >
+                              <EyeIcon className="h-4 w-4 mr-1" />
+                              {blog.views_count ?? 0}
                             </motion.span>
                             <motion.span 
                               whileHover={{ scale: 1.1 }}

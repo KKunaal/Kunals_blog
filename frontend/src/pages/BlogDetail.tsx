@@ -13,6 +13,7 @@ import {
   PaperAirplaneIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { EyeIcon } from '@heroicons/react/24/outline';
 import { publicBlogAPI } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import type { Blog, Comment, CreateCommentRequest } from '../types';
@@ -240,6 +241,10 @@ const BlogDetail: React.FC = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <EyeIcon className="h-5 w-5" />
+                  <span className="font-medium">{blog.views_count ?? 0}</span>
+                </div>
                 {!!user && (
                 <motion.button
                   whileHover={{ scale: 1.05 }}

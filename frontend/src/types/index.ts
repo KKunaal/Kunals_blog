@@ -18,10 +18,12 @@ export interface Blog {
   custom_date?: string;
   likes_count: number;
   comments_count: number;
+  views_count: number;
   created_at: string;
   updated_at: string;
   comments?: Comment[];
   likes?: Like[];
+  versions?: BlogVersion[];
 }
 
 export interface Comment {
@@ -38,6 +40,17 @@ export interface Comment {
 export interface Like {
   id: string;
   blog_id: string;
+  created_at: string;
+}
+
+export interface BlogVersion {
+  id: string;
+  blog_id: string;
+  title: string;
+  content: string;
+  language: string;
+  images: string;
+  is_pending: boolean;
   created_at: string;
 }
 
@@ -86,7 +99,7 @@ export interface PaginationParams {
   limit?: number;
   published_only?: boolean;
   language?: string;
-  sort_by?: 'recent' | 'most_commented' | 'most_liked';
+  sort_by?: 'recent' | 'most_commented' | 'most_liked' | 'most_viewed';
 }
 
 export interface PaginationResponse<T> {
