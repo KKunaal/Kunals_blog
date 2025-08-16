@@ -122,69 +122,69 @@ const Home: React.FC = () => {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   layout
                 >
-                  <Card hover className="h-full overflow-hidden group">
-                    {/* Blog Image (if available) */}
-                    {blog.images && (
-                      <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                        <img
-                          src={`http://localhost:8080${blog.images.split(',')[0]}`}
-                          alt={blog.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-                    )}
+                  <Link to={`/blog/${blog.id}`} className="block h-full group focus:outline-none">
+                    <Card hover className="h-full overflow-hidden">
+                      {/* Blog Image (if available) */}
+                      {blog.images && (
+                        <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                          <img
+                            src={`http://localhost:8080${blog.images.split(',')[0]}`}
+                            alt={blog.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        </div>
+                      )}
 
-                    <div className="p-6">
-                      {/* Language Badge & Time */}
-                      <div className="flex items-center justify-between mb-4">
-                        <Badge 
-                          variant="primary" 
-                          icon={<GlobeAltIcon className="h-3 w-3" />}
-                        >
-                          {blog.language === 'devanagari' ? 'देवनागरी' : 'English'}
-                        </Badge>
-                        <time className="text-sm text-gray-500" title={formatDate(blog.published_at || blog.created_at)}>
-                          {timeAgo(blog.published_at || blog.created_at)}
-                        </time>
-                      </div>
+                      <div className="p-6">
+                        {/* Language Badge & Time */}
+                        <div className="flex items-center justify-between mb-4">
+                          <Badge 
+                            variant="primary" 
+                            icon={<GlobeAltIcon className="h-3 w-3" />}
+                          >
+                            {blog.language === 'devanagari' ? 'देवनागरी' : 'English'}
+                          </Badge>
+                          <time className="text-sm text-gray-500" title={formatDate(blog.published_at || blog.created_at)}>
+                            {timeAgo(blog.published_at || blog.created_at)}
+                          </time>
+                        </div>
 
-                      {/* Title */}
-                      <Link to={`/blog/${blog.id}`}>
+                        {/* Title */}
                         <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
                           {stripHtml(blog.title)}
                         </h2>
-                      </Link>
 
-                      {/* Preview */}
-                      <p className="text-gray-600 mb-6 leading-relaxed line-clamp-3">
-                        {truncateText(stripHtml(blog.preview), 120)}
-                      </p>
+                        {/* Preview */}
+                        <p className="text-gray-600 mb-6 leading-relaxed line-clamp-3">
+                          {truncateText(stripHtml(blog.preview), 120)}
+                        </p>
 
-                      {/* Meta Info */}
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <motion.span 
-                            whileHover={{ scale: 1.1 }}
-                            className="flex items-center hover:text-red-500 transition-colors"
-                          >
-                            <HeartIcon className="h-4 w-4 mr-1" />
-                            {blog.likes_count}
-                          </motion.span>
-                          <motion.span 
-                            whileHover={{ scale: 1.1 }}
-                            className="flex items-center hover:text-blue-500 transition-colors"
-                          >
-                            <ChatBubbleLeftIcon className="h-4 w-4 mr-1" />
-                            {blog.comments_count}
-                          </motion.span>
+                        {/* Meta Info */}
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                            <motion.span 
+                              whileHover={{ scale: 1.1 }}
+                              className="flex items-center hover:text-red-500 transition-colors"
+                            >
+                              <HeartIcon className="h-4 w-4 mr-1" />
+                              {blog.likes_count}
+                            </motion.span>
+                            <motion.span 
+                              whileHover={{ scale: 1.1 }}
+                              className="flex items-center hover:text-blue-500 transition-colors"
+                            >
+                              <ChatBubbleLeftIcon className="h-4 w-4 mr-1" />
+                              {blog.comments_count}
+                            </motion.span>
+                          </div>
+                          <span className="flex items-center text-sm text-gray-400">
+                            <CalendarIcon className="h-4 w-4 mr-1" />
+                            {formatDate(blog.published_at || blog.created_at)}
+                          </span>
                         </div>
-                        <span className="flex items-center text-sm text-gray-400">
-                          <CalendarIcon className="h-4 w-4 mr-1" />
-                          {formatDate(blog.published_at || blog.created_at)}
-                        </span>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </Link>
                 </motion.div>
               ))}
             </div>
