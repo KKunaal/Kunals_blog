@@ -18,7 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 bg-spotlight">
       {/* Navigation */}
       <motion.nav 
         initial={{ y: -100 }}
@@ -180,6 +180,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <main className="flex-1 relative">
+        {/* Decorative background accents */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full blur-3xl opacity-30 bg-blue-300/40" />
+          <div className="absolute -bottom-24 -right-24 h-64 w-64 rounded-full blur-3xl opacity-30 bg-fuchsia-300/40" />
+        </div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -194,7 +199,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="bg-white/80 backdrop-blur-md border-t border-white/20 mt-auto"
+        className="glass mt-auto"
       >
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="text-center">
