@@ -83,6 +83,7 @@ func GetBlogs(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	publishedOnly := c.DefaultQuery("published_only", "true") == "true"
 	language := c.Query("language")
+	sortBy := c.DefaultQuery("sort_by", "recent") // recent | most_commented | most_liked
 
 	offset := (page - 1) * limit
 
@@ -101,9 +102,19 @@ func GetBlogs(c *gin.Context) {
 	var total int64
 	query.Count(&total)
 
+	// Sort
+	switch sortBy {
+	case "most_commented":
+		query = query.Order("comments_count DESC").Order("created_at DESC")
+	case "most_liked":
+		query = query.Order("likes_count DESC").Order("created_at DESC")
+	default:
+		query = query.Order("created_at DESC")
+	}
+
 	// Get blogs with pagination
 	var blogs []models.Blog
-	result := query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&blogs)
+	result := query.Limit(limit).Offset(offset).Find(&blogs)
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch blogs"})

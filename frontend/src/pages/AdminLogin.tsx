@@ -63,7 +63,7 @@ const AdminLogin: React.FC = () => {
                 <LockClosedIcon className="h-8 w-8 text-white" />
               </motion.div>
               <h2 className="mt-6 text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Admin Login
+                Sign In
               </h2>
               <p className="mt-2 text-gray-600">
                 Sign in to manage your blog

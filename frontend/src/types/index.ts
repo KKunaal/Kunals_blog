@@ -86,6 +86,7 @@ export interface PaginationParams {
   limit?: number;
   published_only?: boolean;
   language?: string;
+  sort_by?: 'recent' | 'most_commented' | 'most_liked';
 }
 
 export interface PaginationResponse<T> {

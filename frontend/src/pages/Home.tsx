@@ -13,32 +13,46 @@ import { Loading } from '../components/ui/Loading';
 
 const Home: React.FC = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isRefetching, setIsRefetching] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const [sortBy, setSortBy] = useState<'recent' | 'most_commented' | 'most_liked'>('recent');
 
   useEffect(() => {
     fetchBlogs();
-  }, [page, selectedLanguage]);
+  }, [page, selectedLanguage, sortBy]);
 
   const fetchBlogs = async () => {
     try {
-      setLoading(true);
+      if (initialLoading) {
+        setInitialLoading(true);
+      } else {
+        setIsRefetching(true);
+      }
       const response = await publicBlogAPI.getBlogs({
         page,
         limit: 6,
         published_only: true,
         language: selectedLanguage || undefined,
+        sort_by: sortBy,
       });
       setBlogs(response.blogs);
       setTotalPages(response.pagination.total_pages);
     } catch (error) {
       console.error('Failed to fetch blogs:', error);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
+      setIsRefetching(false);
     }
   };
+
+  // initial load
+  useEffect(() => {
+    fetchBlogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
@@ -50,77 +64,52 @@ const Home: React.FC = () => {
     threshold: 0.1,
   });
 
-  if (loading) {
+  if (initialLoading) {
     return <Loading size="xl" text="Loading amazing content..." fullScreen />;
   }
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <motion.section 
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20"
-      >
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-5xl sm:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6"
-          >
-            Welcome to Kunal's Blog
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
-          >
-            Sharing thoughts, experiences, and insights about technology, life, and everything in between.
-            Available in English and देवनागरी.
-          </motion.p>
-        </div>
-      </motion.section>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Language Filter */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Filters */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="mb-12 flex flex-wrap justify-center gap-3"
+          className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
-          <Button
-            variant={selectedLanguage === '' ? 'primary' : 'outline'}
-            onClick={() => handleLanguageChange('')}
-            size="md"
-          >
-            All Languages
-          </Button>
-          <Button
-            variant={selectedLanguage === 'english' ? 'primary' : 'outline'}
-            onClick={() => handleLanguageChange('english')}
-            size="md"
-          >
-            English
-          </Button>
-          <Button
-            variant={selectedLanguage === 'devanagari' ? 'primary' : 'outline'}
-            onClick={() => handleLanguageChange('devanagari')}
-            size="md"
-          >
-            देवनागरी
-          </Button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+            <select
+              value={selectedLanguage}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Languages</option>
+              <option value="english">English</option>
+              <option value="devanagari">देवनागरी</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+            <select
+              value={sortBy}
+              onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
+              className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="recent">Most Recent</option>
+              <option value="most_liked">Most Liked</option>
+              <option value="most_commented">Most Commented</option>
+            </select>
+          </div>
+          <div className="hidden sm:block" />
         </motion.div>
 
         {/* Blog Grid */}
         <motion.div 
           ref={ref}
           initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : { opacity: 0 }}
+          animate={inView ? { opacity: isRefetching ? 0.6 : 1 } : { opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
           {blogs.length > 0 ? (
@@ -131,6 +120,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 50 }}
                   animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                  layout
                 >
                   <Card hover className="h-full overflow-hidden group">
                     {/* Blog Image (if available) */}

@@ -66,7 +66,7 @@ func GetComments(c *gin.Context) {
 	db := database.GetDB()
 
 	var comments []models.Comment
-	result := db.Where("blog_id = ?", blogID).Order("created_at ASC").Find(&comments)
+	result := db.Where("blog_id = ?", blogID).Order("created_at DESC").Find(&comments)
 
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})

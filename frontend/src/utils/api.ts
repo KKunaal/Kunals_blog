@@ -56,6 +56,7 @@ export const publicBlogAPI = {
     if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.published_only !== undefined) queryParams.append('published_only', params.published_only.toString());
     if (params.language) queryParams.append('language', params.language);
+    if ((params as any).sort_by) queryParams.append('sort_by', (params as any).sort_by as string);
 
     const response = await api.get(`/public/blogs?${queryParams.toString()}`);
     return response.data;
