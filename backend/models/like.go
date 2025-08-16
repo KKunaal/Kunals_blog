@@ -10,8 +10,9 @@ import (
 type Like struct {
 	ID        string    `json:"id" gorm:"primaryKey"`
 	BlogID    string    `json:"blog_id" gorm:"not null"`
+	UserID    string    `json:"user_id" gorm:"index"`
 	IPAddress string    `json:"-" gorm:"not null"` // Track by IP to prevent multiple likes
-	UserAgent string    `json:"-"` // Additional tracking
+	UserAgent string    `json:"-"`                 // Additional tracking
 	CreatedAt time.Time `json:"created_at"`
 
 	// Relations

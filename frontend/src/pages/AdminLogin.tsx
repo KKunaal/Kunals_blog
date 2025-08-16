@@ -143,22 +143,10 @@ const AdminLogin: React.FC = () => {
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>
 
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-center"
-              >
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <p className="text-sm text-blue-800 font-medium">
-                    Default credentials
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    Username: <code className="bg-blue-100 px-1 rounded">admin</code> | 
-                    Password: <code className="bg-blue-100 px-1 rounded">admin123</code>
-                  </p>
-                </div>
-              </motion.div>
+              <div className="text-center text-sm text-gray-600">
+                <span>Don’t have an account? </span>
+                <a href="/signup" className="text-blue-600 hover:underline">Sign up</a>
+              </div>
             </motion.form>
           </div>
         </Card>

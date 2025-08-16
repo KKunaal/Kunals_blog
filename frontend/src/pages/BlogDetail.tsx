@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { publicBlogAPI } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 import type { Blog, Comment, CreateCommentRequest } from '../types';
 import { formatDate, timeAgo, stripHtml } from '../utils/helpers';
 import { Loading } from '../components/ui/Loading';
@@ -34,10 +35,13 @@ const BlogDetail: React.FC = () => {
   // Comment form state
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [commentText, setCommentText] = useState('');
-  const [authorName, setAuthorName] = useState('');
-  const [authorEmail, setAuthorEmail] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const { user } = useAuth();
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(true);
   const [submittingComment, setSubmittingComment] = useState(false);
+
+  useEffect(() => {
+    setIsAnonymous(!user);
+  }, [user]);
 
   useEffect(() => {
     if (id) {
@@ -95,8 +99,9 @@ const BlogDetail: React.FC = () => {
     e.preventDefault();
     if (!id || !commentText.trim()) return;
 
-    if (!isAnonymous && (!authorName.trim() || !authorEmail.trim())) {
-      toast.error('Please provide your name and email');
+    // Validate when posting with username
+    if (!isAnonymous && !user) {
+      toast.error('Please login to comment with your username or choose anonymous');
       return;
     }
 
@@ -106,10 +111,7 @@ const BlogDetail: React.FC = () => {
         blog_id: id,
         content: commentText.trim(),
         is_anonymous: isAnonymous,
-        ...(isAnonymous ? {} : { 
-          author_name: authorName.trim(), 
-          email: authorEmail.trim() 
-        })
+        ...(isAnonymous ? {} : { author_name: user?.username })
       };
 
       await publicBlogAPI.createComment(commentData);
@@ -121,8 +123,6 @@ const BlogDetail: React.FC = () => {
 
       // Reset form
       setCommentText('');
-      setAuthorName('');
-      setAuthorEmail('');
       setShowCommentForm(false);
       
       toast.success('💬 Comment added successfully!');
@@ -240,6 +240,7 @@ const BlogDetail: React.FC = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
+                {!!user && (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -257,6 +258,7 @@ const BlogDetail: React.FC = () => {
                   )}
                   <span className="font-medium">{likesCount}</span>
                 </motion.button>
+                )}
 
                 <button
                   onClick={() => setShowCommentForm(!showCommentForm)}
@@ -295,7 +297,17 @@ const BlogDetail: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <button
                     type="button"
-                    onClick={() => setIsAnonymous(!isAnonymous)}
+                    onClick={() => setIsAnonymous(false)}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all ${
+                      !isAnonymous ? 'bg-blue-600 text-white' : 'bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    <span className="text-sm">Comment as username</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsAnonymous(true)}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all ${
                       isAnonymous ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-600'
                     }`}
@@ -304,38 +316,6 @@ const BlogDetail: React.FC = () => {
                     <span className="text-sm">Comment anonymously</span>
                   </button>
                 </div>
-
-                {/* Name and Email Fields */}
-                {!isAnonymous && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Your Name *
-                      </label>
-                      <input
-                        type="text"
-                        value={authorName}
-                        onChange={(e) => setAuthorName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your name"
-                        required={!isAnonymous}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Your Email *
-                      </label>
-                      <input
-                        type="email"
-                        value={authorEmail}
-                        onChange={(e) => setAuthorEmail(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your email"
-                        required={!isAnonymous}
-                      />
-                    </div>
-                  </div>
-                )}
 
                 {/* Comment Text */}
                 <div>

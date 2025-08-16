@@ -76,7 +76,7 @@ func GetComments(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"comments": comments})
 }
 
-// LikeBlog adds a like to a blog (one per IP)
+// LikeBlog adds a like to a blog (one per user if logged in, else per IP)
 func LikeBlog(c *gin.Context) {
 	blogID := c.Param("id")
 	db := database.GetDB()
@@ -90,10 +90,16 @@ func LikeBlog(c *gin.Context) {
 
 	clientIP := c.ClientIP()
 	userAgent := c.GetHeader("User-Agent")
+	userIDVal, _ := c.Get("user_id")
+	userID, _ := userIDVal.(string)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Login required to like"})
+		return
+	}
 
-	// Check if already liked by this IP
+	// Check if already liked (by user if logged in, else by IP)
 	var existingLike models.Like
-	if err := db.Where("blog_id = ? AND ip_address = ?", blogID, clientIP).First(&existingLike).Error; err == nil {
+	if err := db.Where("blog_id = ? AND user_id = ?", blogID, userID).First(&existingLike).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Already liked by this user"})
 		return
 	}
@@ -103,6 +109,7 @@ func LikeBlog(c *gin.Context) {
 		IPAddress: clientIP,
 		UserAgent: userAgent,
 	}
+	like.UserID = userID
 
 	if err := db.Create(&like).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create like"})
@@ -130,10 +137,15 @@ func UnlikeBlog(c *gin.Context) {
 		return
 	}
 
-	clientIP := c.ClientIP()
+	userIDVal, _ := c.Get("user_id")
+	userID, _ := userIDVal.(string)
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Login required to unlike"})
+		return
+	}
 
-	// Find and delete the like
-	result := db.Where("blog_id = ? AND ip_address = ?", blogID, clientIP).Delete(&models.Like{})
+	// Find and delete the like (by user if logged in, else by IP)
+	result := db.Where("blog_id = ? AND user_id = ?", blogID, userID).Delete(&models.Like{})
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove like"})
 		return
@@ -159,10 +171,11 @@ func UnlikeBlog(c *gin.Context) {
 func CheckLikeStatus(c *gin.Context) {
 	blogID := c.Param("id")
 	db := database.GetDB()
-	clientIP := c.ClientIP()
+	userIDVal, _ := c.Get("user_id")
+	userID, _ := userIDVal.(string)
 
 	var like models.Like
-	liked := db.Where("blog_id = ? AND ip_address = ?", blogID, clientIP).First(&like).Error == nil
+	liked := db.Where("blog_id = ? AND user_id = ?", blogID, userID).First(&like).Error == nil
 
 	c.JSON(http.StatusOK, gin.H{"liked": liked})
 }

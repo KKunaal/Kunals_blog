@@ -23,6 +23,50 @@ type LoginResponse struct {
 	Message string      `json:"message"`
 }
 
+type SignupRequest struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+func Signup(c *gin.Context) {
+	var req SignupRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	db := database.GetDB()
+
+	// Prevent creating another admin through signup
+	if req.Username == config.GetConfig().AdminUsername {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Reserved username"})
+		return
+	}
+
+	// Check if user exists
+	var existing models.User
+	if err := db.Where("username = ?", req.Username).First(&existing).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Username already taken"})
+		return
+	}
+
+	// Create user
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
+
+	user := models.User{Username: req.Username, Password: string(hashed), IsAdmin: false}
+	if err := db.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
+
+	user.Password = ""
+	c.JSON(http.StatusCreated, gin.H{"message": "Signup successful", "user": user})
+}
+
 func Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

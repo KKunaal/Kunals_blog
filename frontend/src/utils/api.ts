@@ -8,6 +8,7 @@ import type {
   Comment,
   CreateCommentRequest,
   PaginationParams,
+  SignupRequest,
 } from '../types';
 
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -38,6 +39,11 @@ export const authAPI = {
 
   validateToken: async () => {
     const response = await api.get('/auth/validate');
+    return response.data;
+  },
+
+  signup: async (payload: SignupRequest) => {
+    const response = await api.post('/auth/signup', payload);
     return response.data;
   },
 };

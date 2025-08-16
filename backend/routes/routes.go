@@ -26,16 +26,17 @@ func SetupRoutes(router *gin.Engine) {
 			public.GET("/blogs/:id/comments", controllers.GetComments)
 			public.POST("/blogs/:id/comments", controllers.CreateComment)
 
-			// Like routes
-			public.POST("/blogs/:id/like", controllers.LikeBlog)
-			public.DELETE("/blogs/:id/like", controllers.UnlikeBlog)
-			public.GET("/blogs/:id/like-status", controllers.CheckLikeStatus)
+			// Like routes (auth required)
+			public.POST("/blogs/:id/like", middleware.AuthMiddleware(), controllers.LikeBlog)
+			public.DELETE("/blogs/:id/like", middleware.AuthMiddleware(), controllers.UnlikeBlog)
+			public.GET("/blogs/:id/like-status", middleware.AuthMiddleware(), controllers.CheckLikeStatus)
 		}
 
 		// Auth routes
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", controllers.Login)
+			auth.POST("/signup", controllers.Signup)
 			auth.GET("/validate", middleware.AuthMiddleware(), controllers.ValidateToken)
 		}
 

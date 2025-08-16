@@ -46,6 +46,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface SignupRequest {
+  username: string;
+  password: string;
+}
+
 export interface LoginResponse {
   token: string;
   user: User;
