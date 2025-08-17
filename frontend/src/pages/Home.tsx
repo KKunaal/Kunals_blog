@@ -68,6 +68,7 @@ const Home: React.FC = () => {
     return <Loading size="xl" text="Loading amazing content..." fullScreen />;
   }
 
+  const ASSET_BASE = import.meta.env.VITE_ASSET_BASE || 'http://localhost:8080';
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -129,7 +130,7 @@ const Home: React.FC = () => {
                       {blog.images && (
                         <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                           <img
-                            src={`http://localhost:8080${blog.images.split(',')[0]}`}
+                            src={`${ASSET_BASE}${blog.images.split(',')[0]}`}
                             alt={blog.title}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />

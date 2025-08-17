@@ -209,7 +209,7 @@ const BlogDetail: React.FC = () => {
               className="mb-8 rounded-2xl overflow-hidden shadow-2xl"
             >
               <img
-                src={`http://localhost:8080${blog.images.split(',')[0]}`}
+                src={`${(import.meta as any).env?.VITE_ASSET_BASE || import.meta.env.VITE_ASSET_BASE || 'http://localhost:8080'}${blog.images.split(',')[0]}`}
                 alt={blog.title}
                 className="w-full h-64 sm:h-96 object-cover"
               />
