@@ -48,6 +48,7 @@ const Card: React.FC<CardProps> = ({
     return (
       <motion.div
         className={cardClasses}
+        style={{ height: '100%' }}
         whileHover={{ y: -4, scale: 1.02 }}
         transition={{ duration: 0.2 }}
       >
@@ -57,7 +58,7 @@ const Card: React.FC<CardProps> = ({
   }
 
   return (
-    <div className={cardClasses}>
+    <div className={cardClasses} style={{ height: '100%' }}>
       {children}
     </div>
   );

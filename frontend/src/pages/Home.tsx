@@ -48,11 +48,7 @@ const Home: React.FC = () => {
     }
   };
 
-  // initial load
-  useEffect(() => {
-    fetchBlogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // initial load handled by the effect above
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
@@ -70,8 +66,8 @@ const Home: React.FC = () => {
 
   const ASSET_BASE = import.meta.env.VITE_ASSET_BASE || 'http://localhost:8080';
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen flex flex-col" style={{ scrollbarGutter: 'stable both-edges' }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col pb-32">
         {/* Filters */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -112,10 +108,11 @@ const Home: React.FC = () => {
           ref={ref}
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: isRefetching ? 0.6 : 1 } : { opacity: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.3 }}
+          className="relative flex-1"
         >
           {blogs.length > 0 ? (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start content-start auto-rows-max">
               {blogs.map((blog, index) => (
                 <motion.div
                   key={blog.id}
@@ -216,14 +213,21 @@ const Home: React.FC = () => {
           )}
         </motion.div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-16 flex justify-center"
-          >
-            <div className="flex space-x-2 bg-white/50 backdrop-blur-sm rounded-2xl p-2 border border-white/20 shadow-lg">
+        {/* Smooth refetch overlay */}
+        {isRefetching && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-blue-600 border-t-transparent" />
+          </div>
+        )}
+
+        {/* Pagination (fixed at bottom of page) */}
+        <div className="mt-auto" />
+      </div>
+
+      {totalPages > 1 && (
+        <div className="fixed left-1/2 -translate-x-1/2 bottom-16 sm:bottom-14 md:bottom-16 lg:bottom-20 z-40">
+          <div className="flex justify-center">
+            <div className="flex flex-wrap gap-2 bg-white/90 backdrop-blur-md rounded-full px-3 py-2 border border-gray-200 shadow-lg">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                 <Button
                   key={pageNum}
@@ -236,9 +240,9 @@ const Home: React.FC = () => {
                 </Button>
               ))}
             </div>
-          </motion.div>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
