@@ -1,0 +1,25 @@
+# VCS
+.git
+
+# Editor/OS
+.DS_Store
+.vscode
+.idea
+
+# Go build artifacts
+/build
+/bin
+/tmp
+*.test
+
+# Local runtime data (mount instead)
+blog.db
+uploads
+
+# Node leftovers
+node_modules
+npm-debug.log
+
+# Docker files
+Dockerfile
+.dockerignore
