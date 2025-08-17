@@ -226,8 +226,8 @@ const BlogEditor: React.FC = () => {
               {showPreview ? 'Exit Preview' : 'Preview'}
             </button>
 
-            {/* Save Draft at top (hidden during preview of a version) */}
-            {isEditing && !activeVersionPreview && (
+            {/* Save Draft at top (visible in both create and edit, hidden during version preview) */}
+            {!activeVersionPreview && (
               <button
                 onClick={() => handleSave(false)}
                 disabled={saving}
@@ -249,6 +249,17 @@ const BlogEditor: React.FC = () => {
                 } disabled:opacity-50`}
               >
                 {blog.is_published ? 'Unpublish' : 'Publish'}
+              </button>
+            )}
+
+            {/* Publish for creation mode */}
+            {!isEditing && !activeVersionPreview && (
+              <button
+                onClick={() => handleSave(true)}
+                disabled={saving}
+                className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                Publish
               </button>
             )}
           </div>
