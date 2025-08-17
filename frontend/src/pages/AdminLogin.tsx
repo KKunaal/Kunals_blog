@@ -5,6 +5,7 @@ import { LockClosedIcon, UserIcon, EyeIcon, EyeSlashIcon } from '@heroicons/reac
 import { useAuth } from '../contexts/AuthContext';
 import { Card } from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import { authAPI } from '../utils/api';
 
 const AdminLogin: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -29,13 +30,16 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = await login({ username, password });
-    
-    if (success) {
+    try {
+      const { token, user } = await authAPI.login({ username, password });
+      login(token, user);
       navigate(from, { replace: true });
+    } catch (err) {
+      // optionally show a toast here
+      console.error('Login failed', err);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (

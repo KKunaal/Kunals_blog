@@ -1,8 +1,6 @@
-import { clsx, type ClassValue } from 'clsx';
-
-export function cn(...inputs: ClassValue[]) {
-  return clsx(inputs);
-}
+export const cn = (...classes: (string | boolean | undefined)[]): string => {
+  return classes.filter(Boolean).join(' ');
+};
 
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -13,16 +11,15 @@ export function formatDate(dateString: string): string {
   });
 }
 
-export function formatDateTime(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
+export const formatDateTime = (date: string): string => {
+  return new Date(date).toLocaleString('en-US', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   });
-}
+};
 
 export function timeAgo(dateString: string): string {
   const date = new Date(dateString);
@@ -36,7 +33,7 @@ export function timeAgo(dateString: string): string {
     day: 86400,
     hour: 3600,
     minute: 60,
-  };
+  } as const;
   
   for (const [unit, seconds] of Object.entries(intervals)) {
     const interval = Math.floor(diffInSeconds / seconds);

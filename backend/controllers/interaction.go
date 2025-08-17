@@ -2,9 +2,12 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
+	"time"
 
 	"kunals-blog-backend/database"
 	"kunals-blog-backend/models"
+	"kunals-blog-backend/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -178,4 +181,127 @@ func CheckLikeStatus(c *gin.Context) {
 	liked := db.Where("blog_id = ? AND user_id = ?", blogID, userID).First(&like).Error == nil
 
 	c.JSON(http.StatusOK, gin.H{"liked": liked})
+}
+
+// Admin: list likers with username or location
+func AdminListLikers(c *gin.Context) {
+	blogID := c.Param("id")
+	db := database.GetDB()
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+	if limit <= 0 || limit > 50 {
+		limit = 5
+	}
+	offset := (page - 1) * limit
+
+	var total int64
+	db.Model(&models.Like{}).Where("blog_id = ?", blogID).Count(&total)
+
+	var likes []models.Like
+	if err := db.Where("blog_id = ?", blogID).Order("created_at DESC").Limit(limit).Offset(offset).Find(&likes).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch likes"})
+		return
+	}
+
+	type liker struct {
+		ID        string `json:"id"`
+		When      string `json:"created_at"`
+		Display   string `json:"display"`
+		UserID    string `json:"user_id"`
+		IPAddress string `json:"ip_address"`
+	}
+
+	enriched := make([]liker, 0, len(likes))
+	for _, l := range likes {
+		display := ""
+		if l.UserID != "" {
+			var user models.User
+			if err := db.Select("id, username").First(&user, "id = ?", l.UserID).Error; err == nil {
+				display = user.Username
+			}
+		}
+		if display == "" {
+			display = utils.GetGeoLabel(l.IPAddress)
+		}
+
+		enriched = append(enriched, liker{
+			ID:        l.ID,
+			When:      l.CreatedAt.Format(time.RFC3339),
+			Display:   display,
+			UserID:    l.UserID,
+			IPAddress: l.IPAddress,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"items": enriched,
+		"pagination": gin.H{
+			"page":        page,
+			"limit":       limit,
+			"total":       total,
+			"total_pages": (total + int64(limit) - 1) / int64(limit),
+		},
+	})
+}
+
+// Admin: list viewers with username or location
+func AdminListViewers(c *gin.Context) {
+	blogID := c.Param("id")
+	db := database.GetDB()
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+	if limit <= 0 || limit > 50 {
+		limit = 5
+	}
+	offset := (page - 1) * limit
+
+	var total int64
+	db.Model(&models.View{}).Where("blog_id = ?", blogID).Count(&total)
+
+	var views []models.View
+	if err := db.Where("blog_id = ?", blogID).Order("created_at DESC").Limit(limit).Offset(offset).Find(&views).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch views"})
+		return
+	}
+
+	type viewer struct {
+		ID        string `json:"id"`
+		When      string `json:"created_at"`
+		Display   string `json:"display"`
+		UserID    string `json:"user_id"`
+		IPAddress string `json:"ip_address"`
+	}
+
+	enriched := make([]viewer, 0, len(views))
+	for _, v := range views {
+		display := ""
+		if v.UserID != "" {
+			var user models.User
+			if err := db.Select("id, username").First(&user, "id = ?", v.UserID).Error; err == nil {
+				display = user.Username
+			}
+		}
+		if display == "" {
+			display = utils.GetGeoLabel(v.IPAddress)
+		}
+		enriched = append(enriched, viewer{
+			ID:        v.ID,
+			When:      v.CreatedAt.Format(time.RFC3339),
+			Display:   display,
+			UserID:    v.UserID,
+			IPAddress: v.IPAddress,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"items": enriched,
+		"pagination": gin.H{
+			"page":        page,
+			"limit":       limit,
+			"total":       total,
+			"total_pages": (total + int64(limit) - 1) / int64(limit),
+		},
+	})
 }

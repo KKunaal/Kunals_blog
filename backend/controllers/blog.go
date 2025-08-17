@@ -108,7 +108,7 @@ func GetBlogs(c *gin.Context) {
 	var total int64
 	query.Count(&total)
 
-	// Sorting: prefer published_at when available
+	// Sorting: prefer published_at for public, updated_at for admin
 	switch sortBy {
 	case "most_commented":
 		query = query.Order("comments_count DESC").Order("COALESCE(published_at, created_at) DESC")
@@ -116,8 +116,15 @@ func GetBlogs(c *gin.Context) {
 		query = query.Order("likes_count DESC").Order("COALESCE(published_at, created_at) DESC")
 	case "most_viewed":
 		query = query.Order("views_count DESC").Order("COALESCE(published_at, created_at) DESC")
+	case "publish_date":
+		// In admin, show published first by publish date, then drafts by created date
+		query = query.Order("is_published DESC").Order("published_at DESC").Order("created_at DESC")
 	default:
-		query = query.Order("COALESCE(published_at, created_at) DESC")
+		if publishedOnly {
+			query = query.Order("COALESCE(published_at, created_at) DESC")
+		} else {
+			query = query.Order("updated_at DESC")
+		}
 	}
 
 	// Get blogs with pagination

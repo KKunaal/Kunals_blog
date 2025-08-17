@@ -59,6 +59,10 @@ func SetupRoutes(router *gin.Engine) {
 				controllers.GetBlogs(c)
 			})
 
+			// Admin insights
+			admin.GET("/blogs/:id/likers", controllers.AdminListLikers)
+			admin.GET("/blogs/:id/viewers", controllers.AdminListViewers)
+
 			// Image upload
 			admin.POST("/upload/image", controllers.UploadImage)
 		}
