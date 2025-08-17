@@ -99,7 +99,7 @@ export interface PaginationParams {
   limit?: number;
   published_only?: boolean;
   language?: string;
-  sort_by?: 'recent' | 'most_commented' | 'most_liked' | 'most_viewed';
+  sort_by?: 'recent' | 'most_commented' | 'most_liked' | 'most_viewed' | 'publish_date';
 }
 
 export interface PaginationResponse<T> {

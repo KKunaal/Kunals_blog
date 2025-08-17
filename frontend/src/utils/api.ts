@@ -107,6 +107,18 @@ export const adminBlogAPI = {
     return response.data;
   },
 
+  getLikers: async (blogId: string, page = 1, limit = 5) => {
+    const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+    const response = await api.get(`/admin/blogs/${blogId}/likers?${qs.toString()}`);
+    return response.data as { items: { id: string; created_at: string; display: string; user_id?: string; ip_address?: string }[]; pagination: any };
+  },
+
+  getViewers: async (blogId: string, page = 1, limit = 5) => {
+    const qs = new URLSearchParams({ page: String(page), limit: String(limit) });
+    const response = await api.get(`/admin/blogs/${blogId}/viewers?${qs.toString()}`);
+    return response.data as { items: { id: string; created_at: string; display: string; user_id?: string; ip_address?: string }[]; pagination: any };
+  },
+
   createBlog: async (blog: CreateBlogRequest) => {
     const response = await api.post('/admin/blogs', blog);
     return response.data;
