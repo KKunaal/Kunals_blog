@@ -291,15 +291,25 @@ const AdminDashboard: React.FC = () => {
                         <Calendar className="h-3 w-3 mr-1" />
                         {blog.published_at ? formatDateTime(blog.published_at) : formatDateTime(blog.created_at)}
                       </span>
-                      <span>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); openLikers(blog.id, 1); }}
+                        className="underline hover:text-pink-700"
+                        title="View likers"
+                      >
                         {blog.likes_count} likes
-                      </span>
+                      </button>
                       <span>
                         {blog.comments_count} comments
                       </span>
-                      <span>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); openViewers(blog.id, 1); }}
+                        className="underline hover:text-gray-700"
+                        title="View viewers"
+                      >
                         {blog.views_count ?? 0} views
-                      </span>
+                      </button>
                     </div>
                   </Link>
                   
