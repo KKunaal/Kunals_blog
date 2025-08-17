@@ -18,7 +18,7 @@ const Home: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'recent' | 'most_commented' | 'most_liked' | 'most_viewed'>('recent');
+  const [sortBy, setSortBy] = useState<'publish_date' | 'most_commented' | 'most_liked' | 'most_viewed'>('publish_date');
 
   useEffect(() => {
     fetchBlogs();
@@ -97,7 +97,7 @@ const Home: React.FC = () => {
               onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }}
               className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="recent">Most Recent</option>
+              <option value="publish_date">Most Recent (Publish Date)</option>
               <option value="most_liked">Most Liked</option>
               <option value="most_commented">Most Commented</option>
               <option value="most_viewed">Most Viewed</option>

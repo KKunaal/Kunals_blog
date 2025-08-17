@@ -13,8 +13,20 @@ const AdminDashboard: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [language, setLanguage] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'recent' | 'most_commented' | 'most_liked' | 'most_viewed'>('recent');
+  const [sortBy, setSortBy] = useState<'recent' | 'publish_date' | 'most_commented' | 'most_liked' | 'most_viewed'>('recent');
   const [isRefetching, setIsRefetching] = useState(false);
+
+  const [likersOpenFor, setLikersOpenFor] = useState<string | null>(null);
+  const [likersItems, setLikersItems] = useState<{ id: string; created_at: string; display: string; user_id?: string; ip_address?: string }[]>([]);
+  const [likersPage, setLikersPage] = useState(1);
+  const [likersTotalPages, setLikersTotalPages] = useState(1);
+  const [likersLoading, setLikersLoading] = useState(false);
+
+  const [viewersOpenFor, setViewersOpenFor] = useState<string | null>(null);
+  const [viewersItems, setViewersItems] = useState<{ id: string; created_at: string; display: string; user_id?: string; ip_address?: string }[]>([]);
+  const [viewersPage, setViewersPage] = useState(1);
+  const [viewersTotalPages, setViewersTotalPages] = useState(1);
+  const [viewersLoading, setViewersLoading] = useState(false);
 
   useEffect(() => {
     fetchBlogs();
@@ -38,6 +50,36 @@ const AdminDashboard: React.FC = () => {
     } finally {
       setLoading(false);
       setIsRefetching(false);
+    }
+  };
+
+  const openLikers = async (blogId: string, pageNum = 1) => {
+    try {
+      setLikersLoading(true);
+      setLikersOpenFor(blogId);
+      setLikersPage(pageNum);
+      const resp = await adminBlogAPI.getLikers(blogId, pageNum, 5);
+      setLikersItems(resp.items);
+      setLikersTotalPages(resp.pagination.total_pages || 1);
+    } catch (e) {
+      toast.error('Failed to load likers');
+    } finally {
+      setLikersLoading(false);
+    }
+  };
+
+  const openViewers = async (blogId: string, pageNum = 1) => {
+    try {
+      setViewersLoading(true);
+      setViewersOpenFor(blogId);
+      setViewersPage(pageNum);
+      const resp = await adminBlogAPI.getViewers(blogId, pageNum, 5);
+      setViewersItems(resp.items);
+      setViewersTotalPages(resp.pagination.total_pages || 1);
+    } catch (e) {
+      toast.error('Failed to load viewers');
+    } finally {
+      setViewersLoading(false);
     }
   };
 
@@ -181,7 +223,8 @@ const AdminDashboard: React.FC = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
           <select value={sortBy} onChange={(e) => { setSortBy(e.target.value as any); setPage(1); }} className="w-full rounded-md border border-gray-300 px-3 py-2">
-            <option value="recent">Most Recent</option>
+            <option value="recent">Most Recent (Last Updated)</option>
+            <option value="publish_date">Publish Date</option>
             <option value="most_liked">Most Liked</option>
             <option value="most_commented">Most Commented</option>
             <option value="most_viewed">Most Viewed</option>
@@ -280,6 +323,24 @@ const AdminDashboard: React.FC = () => {
                     </Link>
                     
                     <button
+                      onClick={() => openLikers(blog.id, 1)}
+                      className="text-pink-600 hover:text-pink-800 transition-colors"
+                      title="View likers"
+                    >
+                      <span className="sr-only">View likers</span>
+                      ❤
+                    </button>
+
+                    <button
+                      onClick={() => openViewers(blog.id, 1)}
+                      className="text-gray-600 hover:text-gray-800 transition-colors"
+                      title="View viewers"
+                    >
+                      <span className="sr-only">View viewers</span>
+                      👁️
+                    </button>
+
+                    <button
                       onClick={() => handlePublishToggle(blog)}
                       className={`transition-colors ${
                         blog.is_published 
@@ -335,6 +396,78 @@ const AdminDashboard: React.FC = () => {
               </button>
             ))}
           </nav>
+        </div>
+      )}
+
+      {/* Likers Modal */}
+      {likersOpenFor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Likers</h3>
+              <button onClick={() => { setLikersOpenFor(null); setLikersItems([]); }}>✕</button>
+            </div>
+            <div className="max-h-80 overflow-auto">
+              {likersLoading ? (
+                <div className="py-8 text-center text-gray-500">Loading…</div>
+              ) : (
+                <ul className="space-y-2">
+                  {likersItems.map((it) => (
+                    <li key={it.id} className="flex items-center justify-between">
+                      <span className="truncate">{it.display}</span>
+                      <span className="text-xs text-gray-500">{new Date(it.created_at).toLocaleString()}</span>
+                    </li>
+                  ))}
+                  {likersItems.length === 0 && (
+                    <li className="text-sm text-gray-500">No likes yet.</li>
+                  )}
+                </ul>
+              )}
+            </div>
+            {likersTotalPages > 1 && (
+              <div className="mt-3 flex items-center justify-between">
+                <button disabled={likersPage===1} onClick={() => openLikers(likersOpenFor, Math.max(1, likersPage-1))} className="text-sm px-2 py-1 border rounded disabled:opacity-50">Prev</button>
+                <span className="text-xs text-gray-500">Page {likersPage} of {likersTotalPages}</span>
+                <button disabled={likersPage>=likersTotalPages} onClick={() => openLikers(likersOpenFor, Math.min(likersTotalPages, likersPage+1))} className="text-sm px-2 py-1 border rounded disabled:opacity-50">Next</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Viewers Modal */}
+      {viewersOpenFor && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Viewers</h3>
+              <button onClick={() => { setViewersOpenFor(null); setViewersItems([]); }}>✕</button>
+            </div>
+            <div className="max-h-80 overflow-auto">
+              {viewersLoading ? (
+                <div className="py-8 text-center text-gray-500">Loading…</div>
+              ) : (
+                <ul className="space-y-2">
+                  {viewersItems.map((it) => (
+                    <li key={it.id} className="flex items-center justify-between">
+                      <span className="truncate">{it.display}</span>
+                      <span className="text-xs text-gray-500">{new Date(it.created_at).toLocaleString()}</span>
+                    </li>
+                  ))}
+                  {viewersItems.length === 0 && (
+                    <li className="text-sm text-gray-500">No views yet.</li>
+                  )}
+                </ul>
+              )}
+            </div>
+            {viewersTotalPages > 1 && (
+              <div className="mt-3 flex items-center justify-between">
+                <button disabled={viewersPage===1} onClick={() => openViewers(viewersOpenFor, Math.max(1, viewersPage-1))} className="text-sm px-2 py-1 border rounded disabled:opacity-50">Prev</button>
+                <span className="text-xs text-gray-500">Page {viewersPage} of {viewersTotalPages}</span>
+                <button disabled={viewersPage>=viewersTotalPages} onClick={() => openViewers(viewersOpenFor, Math.min(viewersTotalPages, viewersPage+1))} className="text-sm px-2 py-1 border rounded disabled:opacity-50">Next</button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
