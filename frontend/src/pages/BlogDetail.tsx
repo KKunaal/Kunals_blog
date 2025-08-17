@@ -225,7 +225,7 @@ const BlogDetail: React.FC = () => {
         >
           <Card className="p-8 mb-8">
             <div 
-              className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline"
+              className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline whitespace-pre-wrap break-words tab-size-[4] [&_p]:whitespace-pre-wrap [&_li]:whitespace-pre-wrap [&_p:empty]:h-4"
               dangerouslySetInnerHTML={{ __html: blog.content }}
             />
           </Card>

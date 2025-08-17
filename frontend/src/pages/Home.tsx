@@ -5,7 +5,7 @@ import { CalendarIcon, HeartIcon, ChatBubbleLeftIcon, GlobeAltIcon, EyeIcon } fr
 import { useInView } from 'react-intersection-observer';
 import type { Blog } from '../types';
 import { publicBlogAPI } from '../utils/api';
-import { formatDate, timeAgo, truncateText, stripHtml } from '../utils/helpers';
+import { formatDate, timeAgo, stripHtml } from '../utils/helpers';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -156,10 +156,12 @@ const Home: React.FC = () => {
                           {stripHtml(blog.title)}
                         </h2>
 
-                        {/* Preview */}
-                        <p className="text-gray-600 mb-6 leading-relaxed line-clamp-3">
-                          {truncateText(stripHtml(blog.preview), 120)}
-                        </p>
+                        {/* Preview (preserve formatting, alignment, spaces/tabs) */}
+                        <div
+                          className="text-gray-600 mb-6 leading-relaxed not-prose whitespace-pre-wrap break-words tab-size-[4] [&_p]:whitespace-pre-wrap [&_li]:whitespace-pre-wrap [&_p:empty]:h-4 overflow-hidden"
+                          style={{ maxHeight: '8rem' }}
+                          dangerouslySetInnerHTML={{ __html: blog.content }}
+                        />
 
                         {/* Meta Info */}
                         <div className="flex items-center justify-between pt-4 border-t border-gray-100">

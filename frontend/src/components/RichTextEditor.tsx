@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
+import TextAlign from '@tiptap/extension-text-align';
 import {
   Bold,
   Italic,
@@ -15,6 +16,10 @@ import {
   List,
   ListOrdered,
   Quote,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
   Undo,
   Redo,
   ImageIcon,
@@ -44,6 +49,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }),
       TextStyle,
       Color,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -51,7 +59,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-lg max-w-none focus:outline-none min-h-[400px] p-4',
+        class: 'prose prose-lg max-w-none focus:outline-none min-h-[400px] p-4 whitespace-pre-wrap',
+      },
+      handleKeyDown(_, event) {
+        // Insert spaces on Tab to preserve indentation
+        if (event.key === 'Tab' && !event.shiftKey) {
+          event.preventDefault();
+          editor?.chain().insertContent('    ').run();
+          return true;
+        }
+        return false;
       },
     },
   });
@@ -65,7 +82,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       if (file) {
         try {
           const response = await adminBlogAPI.uploadImage(file);
-          const imageUrl = `http://localhost:8080${response.url}`;
+          const base = (import.meta as any).env?.VITE_ASSET_BASE || import.meta.env.VITE_ASSET_BASE || 'http://localhost:8080';
+          const imageUrl = `${base}${response.url}`;
           
           if (editor) {
             editor.chain().focus().setImage({ src: imageUrl }).run();
@@ -220,6 +238,36 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         </MenuButton>
 
         <div className="w-px h-6 bg-gray-300 mx-1" />
+
+        {/* Alignment */}
+        <MenuButton
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          isActive={editor.isActive({ textAlign: 'left' })}
+          title="Align Left"
+        >
+          <AlignLeft className="h-4 w-4" />
+        </MenuButton>
+        <MenuButton
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          isActive={editor.isActive({ textAlign: 'center' })}
+          title="Align Center"
+        >
+          <AlignCenter className="h-4 w-4" />
+        </MenuButton>
+        <MenuButton
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          isActive={editor.isActive({ textAlign: 'right' })}
+          title="Align Right"
+        >
+          <AlignRight className="h-4 w-4" />
+        </MenuButton>
+        <MenuButton
+          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+          isActive={editor.isActive({ textAlign: 'justify' })}
+          title="Justify"
+        >
+          <AlignJustify className="h-4 w-4" />
+        </MenuButton>
 
         {/* Color */}
         <div className="flex items-center">

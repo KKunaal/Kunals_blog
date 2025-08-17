@@ -299,7 +299,7 @@ const BlogEditor: React.FC = () => {
             <div className="bg-white border border-gray-300 rounded-lg p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">{(activeVersionPreview?.title ?? title) || 'Untitled'}</h2>
               <div 
-                className="prose prose-lg max-w-none"
+                className="prose prose-lg max-w-none whitespace-pre-wrap break-words tab-size-[4] [&_p]:whitespace-pre-wrap [&_li]:whitespace-pre-wrap [&_p:empty]:h-4"
                 dangerouslySetInnerHTML={{ __html: activeVersionPreview?.content ?? content }}
               />
             </div>
