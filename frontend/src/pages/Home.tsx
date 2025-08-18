@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CalendarIcon, HeartIcon, ChatBubbleLeftIcon, GlobeAltIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, HeartIcon, ChatBubbleLeftIcon, GlobeAltIcon, EyeIcon, ChevronLeftIcon, ChevronRightIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 import { useInView } from 'react-intersection-observer';
 import type { Blog } from '../types';
 import { publicBlogAPI } from '../utils/api';
@@ -65,6 +65,7 @@ const Home: React.FC = () => {
   }
 
   const ASSET_BASE = import.meta.env.VITE_ASSET_BASE || 'http://localhost:8080';
+  const pagesToShow = Array.from({ length: 4 }, (_, i) => page + i).filter((p) => p <= totalPages);
   return (
     <div className="min-h-screen flex flex-col" style={{ scrollbarGutter: 'stable both-edges' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 flex flex-col pb-32">
@@ -185,7 +186,7 @@ const Home: React.FC = () => {
                               {blog.comments_count}
                             </motion.span>
                           </div>
-                          <span className="flex items-center text-sm text-gray-400">
+                          <span className="flex items-center text-sm text-gray-400 whitespace-nowrap max-w-[10rem] sm:max-w-none overflow-hidden text-ellipsis">
                             <CalendarIcon className="h-4 w-4 mr-1" />
                             {formatDate(blog.published_at || blog.created_at)}
                           </span>
@@ -227,18 +228,73 @@ const Home: React.FC = () => {
       {totalPages > 1 && (
         <div className="fixed left-1/2 -translate-x-1/2 bottom-16 sm:bottom-14 md:bottom-16 lg:bottom-20 z-40">
           <div className="flex justify-center">
-            <div className="flex flex-wrap gap-2 bg-white/90 backdrop-blur-md rounded-full px-3 py-2 border border-gray-200 shadow-lg">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                <Button
-                  key={pageNum}
-                  onClick={() => setPage(pageNum)}
-                  variant={page === pageNum ? 'primary' : 'ghost'}
-                  size="sm"
-                  className="min-w-[2.5rem]"
-                >
-                  {pageNum}
-                </Button>
-              ))}
+            <div className="flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-full px-3 py-2 border border-gray-200 shadow-lg">
+              <Button
+                aria-label="First page"
+                onClick={() => setPage(1)}
+                variant="ghost"
+                size="sm"
+                disabled={page === 1}
+                className="min-w-[2.5rem]"
+              >
+                <ChevronDoubleLeftIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                aria-label="Previous page"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                variant="ghost"
+                size="sm"
+                disabled={page === 1}
+                className="min-w-[2.5rem]"
+              >
+                <ChevronLeftIcon className="h-4 w-4" />
+              </Button>
+
+              <div className="px-1 text-xs text-gray-700 whitespace-nowrap flex items-center gap-1">
+                {pagesToShow.map((p) => (
+                  p === page ? (
+                    <span
+                      key={p}
+                      aria-current="page"
+                      className="inline-flex items-center justify-center h-7 min-w-[1.75rem] px-2 rounded-full bg-blue-600 text-white font-semibold"
+                    >
+                      {p}
+                    </span>
+                  ) : (
+                    <Button
+                      key={p}
+                      aria-label={`Page ${p}`}
+                      onClick={() => setPage(p)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 min-w-[1.75rem] px-2 rounded-full font-medium"
+                    >
+                      {p}
+                    </Button>
+                  )
+                ))}
+              </div>
+
+              <Button
+                aria-label="Next page"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                variant="ghost"
+                size="sm"
+                disabled={page === totalPages}
+                className="min-w-[2.5rem]"
+              >
+                <ChevronRightIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                aria-label="Last page"
+                onClick={() => setPage(totalPages)}
+                variant="ghost"
+                size="sm"
+                disabled={page === totalPages}
+                className="min-w-[2.5rem]"
+              >
+                <ChevronDoubleRightIcon className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
