@@ -16,7 +16,12 @@ func InitDatabase() {
 	cfg := config.GetConfig()
 
 	var err error
-	DB, err = gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+	// Use simple protocol to avoid server-side prepared statement caching
+	// which can cause: "cached plan must not change result type" after schema changes
+	DB, err = gorm.Open(postgres.New(postgres.Config{
+		DSN:                  cfg.DatabaseURL,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
