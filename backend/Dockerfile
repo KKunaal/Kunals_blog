@@ -25,6 +25,9 @@ RUN go mod download
 # Copy the rest of the backend source
 COPY . .
 
+# Ensure module graph matches imports (fetch any missing deps)
+RUN go mod tidy
+
 # Build the binary (keep CGO enabled for sqlite)
 RUN go build -o /app/server .
 
