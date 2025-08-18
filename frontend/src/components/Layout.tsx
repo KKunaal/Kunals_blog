@@ -92,11 +92,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </Button>
                 </div>
               ) : (
-                <Link to="/admin/login">
-                  <Button variant="primary" size="sm">
-                    Login
-                  </Button>
-                </Link>
+                <div className="flex items-center space-x-2">
+                  <Link to="/signup">
+                    <Button variant="outline" size="sm">
+                      Start Writing
+                    </Button>
+                  </Link>
+                  <Link to="/admin/login">
+                    <Button variant="primary" size="sm">
+                      Login
+                    </Button>
+                  </Link>
+                </div>
               )}
             </div>
 
@@ -164,13 +171,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </button>
                   </div>
                 ) : (
-                  <Link
-                    to="/admin/login"
-                    className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-xl text-sm font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Login
-                  </Link>
+                  <div className="space-y-2">
+                    <Link
+                      to="/signup"
+                      className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-xl text-sm font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Start writing
+                    </Link>
+                    <Link
+                      to="/admin/login"
+                      className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-xl text-sm font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                  </div>
                 )}
               </div>
             </motion.div>
