@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.6
-# Multi-stage Docker build for Kunals Blog backend (Go + SQLite)
+# Multi-stage Docker build for Kunals Blog backend (Go + Postgres)
 
 # --- Builder stage ---
 ARG GO_VERSION=1.24.5
@@ -7,8 +7,8 @@ FROM golang:${GO_VERSION}-bookworm AS builder
 
 WORKDIR /app
 
-# Enable CGO (needed for sqlite). Tune Go caches and tmp dir to reduce layer pressure.
-ENV CGO_ENABLED=1 \
+# Disable CGO (no sqlite). Tune Go caches and tmp dir to reduce layer pressure.
+ENV CGO_ENABLED=0 \
     GOMODCACHE=/go/pkg/mod \
     GOCACHE=/root/.cache/go-build \
     GOFLAGS=-buildvcs=false \
@@ -16,10 +16,10 @@ ENV CGO_ENABLED=1 \
     GOMAXPROCS=1
 RUN mkdir -p /app/tmp
 
-# Install build dependencies for CGO (required by mattn/go-sqlite3)
+# Install minimal build dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       build-essential ca-certificates git \
+       ca-certificates git \
     && rm -rf /var/lib/apt/lists/*
 
 # Allow Go to auto-select correct toolchain if needed
@@ -35,13 +35,13 @@ COPY . .
 # Ensure module graph matches imports (fetch any missing deps)
 RUN --mount=type=cache,target=/go/pkg/mod go mod tidy
 
-# Build the binary (keep CGO enabled for sqlite) using external caches to save space
+# Build the binary using external caches to save space
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     go build -p 1 -trimpath -ldflags="-s -w" -o /app/server .
 
 # Pre-create runtime dirs we need in final image (distroless has no shell)
-RUN mkdir -p /runtime/data /runtime/uploads
+RUN mkdir -p /runtime/uploads
 
 
 # --- Runtime stage ---
@@ -51,12 +51,10 @@ WORKDIR /app
 
 # Copy compiled binary
 COPY --from=builder /app/server /app/server
-COPY --from=builder --chown=nonroot:nonroot /runtime/data /data
 COPY --from=builder --chown=nonroot:nonroot /runtime/uploads /app/uploads
 
 # Default config via env vars (can override at runtime)
 ENV PORT=8080 \
-    DB_PATH=/data/blog.db \
     DATABASE_URL= \
     UPLOAD_PATH=/app/uploads \
     JWT_SECRET=change-me \
@@ -65,8 +63,8 @@ ENV PORT=8080 \
 
 EXPOSE 8080
 
-# Persist database and uploads outside container FS
-VOLUME ["/data", "/app/uploads"]
+# Persist uploads outside container FS
+VOLUME ["/app/uploads"]
 
 ENTRYPOINT ["/app/server"]
 

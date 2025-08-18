@@ -6,7 +6,6 @@ import (
 
 type Config struct {
 	Port          string
-	DBPath        string
 	DatabaseURL   string
 	JWTSecret     string
 	AdminUsername string
@@ -17,7 +16,6 @@ type Config struct {
 func GetConfig() *Config {
 	return &Config{
 		Port:          getEnv("PORT", "8080"),
-		DBPath:        getEnv("DB_PATH", "./blog.db"),
 		DatabaseURL:   getEnv("DATABASE_URL", ""),
 		JWTSecret:     getEnv("JWT_SECRET", "your-super-secret-jwt-key-change-this-in-production"),
 		AdminUsername: getEnv("ADMIN_USERNAME", "admin"),
