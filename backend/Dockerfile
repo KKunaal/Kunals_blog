@@ -12,7 +12,8 @@ ENV CGO_ENABLED=1 \
     GOMODCACHE=/go/pkg/mod \
     GOCACHE=/root/.cache/go-build \
     GOFLAGS=-buildvcs=false \
-    TMPDIR=/app/tmp
+    TMPDIR=/app/tmp \
+    GOMAXPROCS=1
 RUN mkdir -p /app/tmp
 
 # Install build dependencies for CGO (required by mattn/go-sqlite3)
@@ -37,7 +38,7 @@ RUN --mount=type=cache,target=/go/pkg/mod go mod tidy
 # Build the binary (keep CGO enabled for sqlite) using external caches to save space
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    go build -trimpath -ldflags="-s -w" -o /app/server .
+    go build -p 1 -trimpath -ldflags="-s -w" -o /app/server .
 
 # Pre-create runtime dirs we need in final image (distroless has no shell)
 RUN mkdir -p /runtime/data /runtime/uploads
