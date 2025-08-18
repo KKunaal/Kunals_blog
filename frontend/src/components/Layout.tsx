@@ -44,7 +44,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <BookOpenIcon className="h-8 w-8 text-blue-600" />
                   <div className="absolute inset-0 bg-blue-600 opacity-20 rounded-full blur-md"></div>
                 </motion.div>
-                <span>Mind Kanvas</span>
+                <span>MindKanvas</span>
               </Link>
             </motion.div>
 
