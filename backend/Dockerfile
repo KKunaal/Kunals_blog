@@ -1,7 +1,7 @@
 # Multi-stage Docker build for Kunals Blog backend (Go + SQLite)
 
 # --- Builder stage ---
-ARG GO_VERSION=1.23.5
+ARG GO_VERSION=1.24.5
 FROM golang:${GO_VERSION}-bookworm AS builder
 
 WORKDIR /app
@@ -15,8 +15,8 @@ RUN apt-get update \
        build-essential ca-certificates git \
     && rm -rf /var/lib/apt/lists/*
 
-# Ensure the requested toolchain is used (and do not try to auto-downgrade)
-ENV GOTOOLCHAIN=local
+# Allow Go to auto-select correct toolchain if needed
+ENV GOTOOLCHAIN=auto
 
 # Copy module files and download deps first (better caching)
 COPY go.mod go.sum ./
