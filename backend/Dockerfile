@@ -1,15 +1,18 @@
 # Multi-stage Docker build for Kunals Blog backend (Go + SQLite)
 
 # --- Builder stage ---
-ARG GO_VERSION=1.24.5
+ARG GO_VERSION=1.23.5
 FROM golang:${GO_VERSION}-bookworm AS builder
 
 WORKDIR /app
 
+# Enable CGO (needed for sqlite). Architecture will follow the image/platform.
+ENV CGO_ENABLED=1
+
 # Install build dependencies for CGO (required by mattn/go-sqlite3)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       build-essential ca-certificates \
+       build-essential ca-certificates git \
     && rm -rf /var/lib/apt/lists/*
 
 # Ensure the requested toolchain is used (and do not try to auto-downgrade)
@@ -42,6 +45,7 @@ COPY --from=builder --chown=nonroot:nonroot /runtime/uploads /app/uploads
 # Default config via env vars (can override at runtime)
 ENV PORT=8080 \
     DB_PATH=/data/blog.db \
+    DATABASE_URL= \
     UPLOAD_PATH=/app/uploads \
     JWT_SECRET=change-me \
     ADMIN_USERNAME=admin \

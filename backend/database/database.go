@@ -6,6 +6,7 @@ import (
 	"kunals-blog-backend/config"
 	"kunals-blog-backend/models"
 
+	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -16,7 +17,11 @@ func InitDatabase() {
 	cfg := config.GetConfig()
 
 	var err error
-	DB, err = gorm.Open(sqlite.Open(cfg.DBPath), &gorm.Config{})
+	if cfg.DatabaseURL != "" {
+		DB, err = gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+	} else {
+		DB, err = gorm.Open(sqlite.Open(cfg.DBPath), &gorm.Config{})
+	}
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
