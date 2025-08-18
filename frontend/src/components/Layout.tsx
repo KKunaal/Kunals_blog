@@ -44,7 +44,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <BookOpenIcon className="h-8 w-8 text-blue-600" />
                   <div className="absolute inset-0 bg-blue-600 opacity-20 rounded-full blur-md"></div>
                 </motion.div>
-                <span>Kunal's Blog</span>
+                <span>Mind Kanvas</span>
               </Link>
             </motion.div>
 
@@ -208,7 +208,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className="inline-block"
             >
               <p className="text-gray-600 text-sm">
-                &copy; 2024 Kunal's Blog. Made with{' '}
+                &copy; 2025 MindKanvas. Made with{' '}
                 <motion.span
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 1, repeat: Infinity }}
@@ -216,7 +216,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 >
                   ❤️
                 </motion.span>{' '}
-                using React and Go.
+                By Kunal G.
               </p>
             </motion.div>
           </div>
